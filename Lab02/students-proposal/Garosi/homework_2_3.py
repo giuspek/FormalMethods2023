@@ -57,3 +57,32 @@ if res:
         print('')
 else:
     print("UNSAT")
+
+
+# -- Uniqueness test --
+# Add new constraints
+if res:
+    sat_model = {el[0].symbol_name():el[1] for el in msat.get_model()}
+    for i in range(N):
+        for j in range(N):
+            if sat_model[f'x{i}_{j}'] == Bool(True):
+                msat.add_assertion(Not(vars[f'x{i}_{j}']))
+
+
+# -- Solve, again --
+res = msat.solve()
+
+
+# -- Display New Output --
+if res:
+    print("-- Another solution --")
+    sat_model = {el[0].symbol_name():el[1] for el in msat.get_model()}
+    for i in range(N):
+        for j in range(N):
+            if sat_model[f'x{i}_{j}'] == Bool(True):
+                print('X', end='')
+            else:
+                print('•', end='')
+        print('')
+else:
+    print("Solution is unique!")
