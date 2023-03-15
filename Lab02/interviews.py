@@ -62,7 +62,7 @@ else:
 	print("UNSAT")
 
 # OPTIONAL: is the solution unique?
-"""
+
 msat.add_assertion(Not(And(var["dc0a"], var["dc1s"], var["dc2i"], var["dc3l"], var["dr0r"], var["dr1m"], var["dr2c"], var["dr3g"])))
 
 final_answer = ["20th: ", "21st: ", "22nd: ", "23rd: "]
@@ -80,5 +80,5 @@ if res:
 	print("\n".join(final_answer))
 else:
 	print("UNSAT")
-"""
+
 
