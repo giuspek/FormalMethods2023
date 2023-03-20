@@ -43,9 +43,8 @@ for i in range(1,N+1):
             n = n-1        
         msat.add_assertion(Implies(vars["x{}{}".format(i,j)],(And(assertion))))
 
-# check uniqueness
-# msat.add_assertion(Not(vars["x161"])
 res = msat.solve()
+uniqueness = list()
 if res:
     solution = list()
     sat_model = {el[0].symbol_name():el[1] for el in msat.get_model()}
@@ -54,6 +53,7 @@ if res:
         for j in range(0,N):
             if sat_model["x{}{}".format(i+1,j+1)] == Bool(True):
                 row.append("Q")
+                uniqueness.append(Symbol("x{}{}".format(i+1,j+1), BOOL))
             else:
                 row.append(".")
         solution.append(row)
@@ -61,3 +61,13 @@ if res:
         print(line)
 else:
     print("UNSAT")
+
+# check uniqueness
+for i in uniqueness:
+    msat.add_assertion(Not(i))
+res = msat.solve()
+
+if res:
+    print("not unique")
+else:
+    print("unique")
