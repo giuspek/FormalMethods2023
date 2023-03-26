@@ -63,8 +63,7 @@ else:
     print("UNSAT")
 
 # check uniqueness
-for i in uniqueness:
-    msat.add_assertion(Not(i))
+msat.add_assertion(Not(And(uniqueness)))
 res = msat.solve()
 
 if res:
