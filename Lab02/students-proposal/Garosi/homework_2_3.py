@@ -63,10 +63,13 @@ else:
 # Add new constraints
 if res:
     sat_model = {el[0].symbol_name():el[1] for el in msat.get_model()}
+    found_queens = []
     for i in range(N):
         for j in range(N):
             if sat_model[f'x{i}_{j}'] == Bool(True):
-                msat.add_assertion(Not(vars[f'x{i}_{j}']))
+                found_queens.append(vars[f'x{i}_{j}'])
+    if len(found_queens) > 0:
+      msat.add_assertion(Not(And(found_queens)))
 
 
 # -- Solve, again --
