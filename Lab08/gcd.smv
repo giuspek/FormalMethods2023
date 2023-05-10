@@ -29,7 +29,9 @@ MODULE main()
         next(ia) := ia;
         next(ib) := ib;
     
-LTLSPEC F (pc = l5);    -- eventually we exit the while loop
+LTLSPEC (a = 16 & b = 12) -> F (a = 4 & b = 4)
+
+LTLSPEC F (G pc = l5);    -- eventually we exit the while loop
 
 INVARSPEC (pc = l5) -> (
     (a = b) & (ia mod a = 0) & (ib mod a = 0) &     -- a is a common divisor
