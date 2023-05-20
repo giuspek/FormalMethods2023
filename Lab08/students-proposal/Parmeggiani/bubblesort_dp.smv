@@ -1,0 +1,93 @@
+MODULE main
+    VAR
+        arr: array 0..4 of 1..5;
+        swapped: boolean;
+        i: 0..4;
+        pc: 1..7;
+
+    ASSIGN
+        init(arr[0]) := 4;
+        init(arr[1]) := 1;
+        init(arr[2]) := 3;
+        init(arr[3]) := 2;
+        init(arr[4]) := 5;
+        init(pc) := 2;
+        init(i) := 0;
+
+        next(pc) :=
+            case
+                pc=1 & swapped: 2;
+                pc=1: 7;
+                pc=2: 3;
+                pc=3 & i < 4: 4;
+                pc=3: 1;
+                -- pc=4 & i=0 & arr[i - 1] > arr[i]: 5;
+                pc=4 & i=1 & arr[0] > arr[1]: 5;
+                pc=4 & i=2 & arr[1] > arr[2]: 5;
+                pc=4 & i=3 & arr[2] > arr[3]: 5;
+                pc=4 & i=4 & arr[3] > arr[4]: 5;
+                pc=4: 3;
+                pc=5: 6;
+                pc=6: 3;
+                pc=7: 7;
+            esac;
+
+        next(swapped) :=
+            case
+                pc=2: FALSE;
+                pc=6: TRUE;
+                TRUE: swapped;
+            esac;
+
+        next(i) :=
+            case
+                pc=3 & i=0: 1;
+                pc=3 & i=1: 2;
+                pc=3 & i=2: 3;
+                pc=3 & i=3: 4;
+                pc=3 & i=4: 0;
+                TRUE: i;
+            esac;
+
+        next(arr[0]) :=
+            case
+                -- pc=5 & i=0: arr[0 - 1];
+                pc=5 & i=1: arr[1];
+                TRUE: arr[0];
+            esac;
+        next(arr[1]) :=
+            case
+                pc=5 & i=1: arr[0];
+                pc=5 & i=2: arr[2];
+                TRUE: arr[1];
+            esac;
+        next(arr[2]) :=
+            case
+                pc=5 & i=2: arr[1];
+                pc=5 & i=3: arr[3];
+                TRUE: arr[2];
+            esac;
+        next(arr[3]) :=
+            case
+                pc=5 & i=3: arr[2];
+                pc=5 & i=4: arr[4];
+                TRUE: arr[3];
+            esac;
+        next(arr[4]) :=
+            case
+                pc=5 & i=4: arr[3];
+                -- pc=5 & i=5: arr[4 + 1];
+                TRUE: arr[4];
+            esac;
+
+
+LTLSPEC !F(G(pc=7))  -- the program ends (does not go in loop pc=7)
+
+LTLSPEC !(F(
+        arr[0] = 1 &
+        arr[1] = 2 &
+        arr[2] = 3 &
+        arr[3] = 4 &
+        arr[4] = 5 &
+        pc = 7
+    ) & (F(G(pc=7))))  -- not (the program loops in pc=7 with a sorted array)
