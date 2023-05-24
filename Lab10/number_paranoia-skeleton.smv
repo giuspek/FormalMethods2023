@@ -1,0 +1,42 @@
+-- Numbers Paranoia Lite
+
+MODULE main
+VAR
+  table : array 0..11 of {1, 2, 3, 4, 0};
+  index : 0..11;
+  cur_max : 0..4;
+  steps : 0..11;
+
+DEFINE
+  upper_plate := (index - 4);
+  lower_plate := (index + 4);
+  left_plate  := (index - 1);
+  right_plate := (index + 1);
+
+  upper_exists := upper_plate >= 0;
+  lower_exists := lower_plate <= 11;
+  left_exists  := (left_plate >= 0)  &
+                  (left_plate <= 11) &
+                  (left_plate mod 4) < (index mod 4);
+  right_exists := (right_plate >= 0)  &
+                  (right_plate <= 11) &
+                  (right_plate mod 4) > (index mod 4); 
+
+  can_go_upper := upper_exists &
+                  (table[upper_plate] = 0 |
+                  table[upper_plate] = cur_max + 1);
+  can_go_lower := lower_exists &
+                  (table[lower_plate] = 0 |
+                  table[lower_plate] = cur_max + 1);
+  can_go_left  := left_exists &
+                  (table[left_plate] = 0 |
+                  table[left_plate] = cur_max + 1);
+  can_go_right := right_exists &
+                  (table[right_plate] = 0 |
+                  table[right_plate] = cur_max + 1);
+
+  
+  -- TODO
+
+ASSIGN
+  -- TODO
