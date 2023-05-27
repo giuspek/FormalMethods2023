@@ -1,0 +1,112 @@
+-- Numbers Paranoia Lite
+
+MODULE main
+VAR
+  table : array 0..11 of {1, 2, 3, 4, 0};
+  index : 0..11;
+  cur_max : 0..4;
+  steps : 0..11;
+
+ASSIGN
+  init(steps) := 0;
+
+  -- starting position is known
+  init(index) := 3;
+  init(cur_max) := 1;
+
+  -- initialize table configuration
+  init(table[0]) := 0;
+  init(table[1]) := 0;
+  init(table[2]) := 3;
+  init(table[3]) := 1;
+  init(table[4]) := 2;
+  init(table[5]) := 4;
+  init(table[6]) := 0;
+  init(table[7]) := 0;
+  init(table[8]) := 0;
+  init(table[9]) := 0;
+  init(table[10]) := 0;
+  init(table[11]) := 0;
+
+  -- update max value each time we hit a plate with greater value
+  next(cur_max) := case
+     table[index] > cur_max : table[index];
+     TRUE : cur_max;
+  esac;
+
+  -- overwrite the value in the plate each time we visit it,
+  -- to prevent visiting it again from another plate
+  next(table[0])  := case index = 0 & table[0] = 0 : cur_max; TRUE : table[0]; esac;
+  next(table[1])  := case index = 1 & table[1] = 0 : cur_max; TRUE : table[1]; esac;
+  next(table[2])  := case index = 2 & table[2] = 0 : cur_max; TRUE : table[2]; esac;
+  next(table[3])  := case index = 3 & table[3] = 0 : cur_max; TRUE : table[3]; esac;
+  next(table[4])  := case index = 4 & table[4] = 0 : cur_max; TRUE : table[4]; esac;
+  next(table[5])  := case index = 5 & table[5] = 0 : cur_max; TRUE : table[5]; esac;
+  next(table[6])  := case index = 6 & table[6] = 0 : cur_max; TRUE : table[6]; esac;
+  next(table[7])  := case index = 7 & table[7] = 0 : cur_max; TRUE : table[7]; esac;
+  next(table[8])  := case index = 8 & table[8] = 0 : cur_max; TRUE : table[8]; esac;
+  next(table[9])  := case index = 9 & table[9] = 0 : cur_max; TRUE : table[9]; esac;
+  next(table[10]) := case index = 10 & table[10] = 0 : cur_max; TRUE : table[10]; esac;
+  next(table[11]) := case index = 11 & table[11] = 0 : cur_max; TRUE : table[11]; esac;
+
+DEFINE
+  upper_plate := (index - 4);
+  lower_plate := (index + 4);
+  left_plate  := (index - 1);
+  right_plate := (index + 1);
+
+  upper_exists := upper_plate >= 0;
+  lower_exists := lower_plate <= 11;
+  left_exists  := (left_plate >= 0)  &
+                  (left_plate <= 11) &
+                  (left_plate mod 4) < (index mod 4);
+  right_exists := (right_plate >= 0)  &
+                  (right_plate <= 11) &
+                  (right_plate mod 4) > (index mod 4); 
+
+  can_go_upper := upper_exists &
+                  (table[upper_plate] = 0 |
+                  table[upper_plate] = cur_max + 1);
+  can_go_lower := lower_exists &
+                  (table[lower_plate] = 0 |
+                  table[lower_plate] = cur_max + 1);
+  can_go_left  := left_exists &
+                  (table[left_plate] = 0 |
+                  table[left_plate] = cur_max + 1);
+  can_go_right := right_exists &
+                  (table[right_plate] = 0 |
+                  table[right_plate] = cur_max + 1);
+
+-- set of legal moves
+ASSIGN
+  next(index) := {index, upper_plate, lower_plate, left_plate, right_plate};
+TRANS
+  !can_go_upper -> next(index) != upper_plate
+TRANS
+  !can_go_lower -> next(index) != lower_plate
+TRANS
+  !can_go_left  -> next(index) != left_plate
+TRANS
+  !can_go_right -> next(index) != right_plate
+
+
+-- loop on the current plate only when search has ended
+TRANS
+  (!can_go_upper & !can_go_lower & !can_go_left & !can_go_right) -> next(index) = index
+TRANS
+  (can_go_upper | can_go_lower | can_go_left | can_go_right) -> next(index) != index
+
+-- increase steps value if plate changes
+TRANS
+  index != next(index) -> next(steps) = steps + 1
+TRANS
+  index = next(index) -> next(steps) = steps
+
+
+
+-- there does not exist a path that terminates on the
+-- highest value and takes exactly N = size(array)-1
+-- steps to reach.
+-- A path violating this property is a possible solution
+-- for the lite game.
+LTLSPEC ! F (steps = 11 & index = 5)
