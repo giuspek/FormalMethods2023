@@ -1,0 +1,94 @@
+MODULE main
+    VAR
+        x : array 0..4 of {1, 2, 3, 4, 5};
+        swap : { s1, s2, s3, s4, none };
+        sorted : boolean;
+
+    ASSIGN
+        init(x[0]) := 4;
+        init(x[1]) := 1;
+        init(x[2]) := 3;
+        init(x[3]) := 2;
+        init(x[4]) := 5;
+
+        init(swap) := none;
+
+        -- output variable to show in an easily-readable way
+        -- whether the sequence is sorted
+        sorted := x[0] < x[1] & x[1] < x[2] & x[2] < x[3] & x[3] < x[4];
+
+
+    TRANS
+        next(x[0]) <= next(x[1]) -> next(swap) != s1
+
+    TRANS
+        next(x[1]) <= next(x[2]) -> next(swap) != s2
+
+    TRANS
+        next(x[2]) <= next(x[3]) -> next(swap) != s3
+
+    TRANS
+        next(x[3]) <= next(x[4]) -> next(swap) != s4
+
+    
+    TRANS
+        swap = s1 -> (
+            next(x[0]) = x[1] &
+            next(x[1]) = x[0] &
+            next(x[2]) = x[2] &
+            next(x[3]) = x[3] &
+            next(x[4]) = x[4]
+        )
+
+    TRANS
+        swap = s2 -> (
+            next(x[0]) = x[0] &
+            next(x[1]) = x[2] &
+            next(x[2]) = x[1] &
+            next(x[3]) = x[3] &
+            next(x[4]) = x[4]
+        )
+
+    TRANS
+        swap = s3 -> (
+            next(x[0]) = x[0] &
+            next(x[1]) = x[1] &
+            next(x[2]) = x[3] &
+            next(x[3]) = x[2] &
+            next(x[4]) = x[4]
+        )
+
+    TRANS
+        swap = s4 -> (
+            next(x[0]) = x[0] &
+            next(x[1]) = x[1] &
+            next(x[2]) = x[2] &
+            next(x[3]) = x[4] &
+            next(x[4]) = x[3]
+        )
+
+    TRANS
+        swap = none -> (
+            next(x[0]) = x[0] &
+            next(x[1]) = x[1] &
+            next(x[2]) = x[2] &
+            next(x[3]) = x[3] &
+            next(x[4]) = x[4]
+        )
+
+
+-- There exist no path in which the algorithm ends
+-- G(sorted) means that the input sequence is always sorted
+-- in any possible path.
+-- F(G(sorted)) means that the input sequence at some point
+-- is sorted and, when it becomes sorted, it remains sorted
+-- forever.
+-- So, since the algorithm "ends" when it is making no more swaps
+-- (which happens only when the input sequence is sorted),
+-- the condition is negated, that is: the algorithm does not
+-- reach a point from which the sequence is stably sorted,
+-- thus continuinig to execute sorting operations.
+-- Since the algorithm is able to sort the input sequence,
+-- it will terminate at some point. Therefore, the property
+-- should be false because it ends in all paths.
+LTLSPEC !F(G (swap = none))
