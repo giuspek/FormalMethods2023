@@ -1,0 +1,142 @@
+MODULE main
+    VAR
+        x : array 0..4 of {1, 2, 3, 4, 5};
+        pc : {l1, l2, l3, l4, l5, l6, l7, l8, l9};
+        swapped : boolean;
+        i : 0..5;
+        sorted : boolean;
+
+    INIT
+        pc = l1;
+
+    ASSIGN
+        init(x[0]) := 4;
+        init(x[1]) := 1;
+        init(x[2]) := 3;
+        init(x[3]) := 2;
+        init(x[4]) := 5;
+
+        next(x[0]) := case
+            pc = l5 & i = 1 : x[1];
+            TRUE            : x[0];
+        esac;
+
+        next(x[1]) := case
+            pc = l5 & i = 1 : x[0];
+            pc = l5 & i = 2 : x[2];
+            TRUE            : x[1];
+        esac;
+
+        next(x[2]) := case
+            pc = l5 & i = 2 : x[1];
+            pc = l5 & i = 3 : x[3];
+            TRUE            : x[2];
+        esac;
+
+        next(x[3]) := case
+            pc = l5 & i = 3 : x[2];
+            pc = l5 & i = 4 : x[4];
+            TRUE            : x[3];
+        esac;
+
+        next(x[4]) := case
+            pc = l5 & i = 4 : x[3];
+            TRUE            : x[4];
+        esac;
+
+        -- output variable to show in an easily-readable way
+        -- whether the sequence is sorted
+        sorted := x[0] < x[1] & x[1] < x[2] & x[2] < x[3] & x[3] < x[4];
+
+    DEFINE
+        n := 5;
+
+    TRANS
+        pc = l1 -> (
+            next(swapped) = FALSE &
+            next(pc) = l2 &
+            next(i) = i
+        )
+
+    TRANS
+        pc = l2 -> (
+            next(i) = 1 &
+            next(pc) = l3 &
+            next(swapped) = swapped
+        )
+    
+    TRANS
+        pc = l3 -> (
+            ((i <= (n - 1) & next(pc) = l4) |
+            (i > (n - 1) & next(pc) = l8)) &
+            next(swapped) = swapped &
+            next(i) = i
+        )
+
+    TRANS
+        pc = l4 -> (
+            i > 0 & i < n &
+            ((x[i - 1] > x[i] & next(pc) = l5) |
+            (x[i - 1] <= x[i] & next(pc) = l7)) &
+            next(swapped) = swapped &
+            next(i) = i
+        )
+
+    TRANS
+        pc = l5 -> (
+            i > 0 & i < n &
+            next(swapped) = swapped &
+            next(i) = i &
+            next(pc) = l6
+        )
+
+    TRANS
+        pc = l6 -> (
+            next(swapped) = TRUE &
+            next(i) = i &
+            next(pc) = l7
+        )
+
+    TRANS
+        pc = l7 -> (
+            next(i) = i + 1 &
+            next(swapped) = swapped &
+            next(pc) = l3
+        )
+    
+    TRANS
+        pc = l8 -> (
+            ((swapped & next(pc) = l1) |
+            (!swapped & next(pc) = l9)) &
+            next(swapped) = swapped &
+            next(i) = i
+        )
+
+    TRANS
+        pc = l9 -> (
+            next(pc) = l9 &
+            next(swapped) = swapped &
+            next(i) = i
+        )
+
+
+-- Pseudocode:
+-- l1: swapped = false
+-- l2: i = 1
+-- l3: i <= n - 1, otherwise jump to l8
+-- l4:      x[i - 1] > x[i], otherwise jump to l7
+-- l5:          swap(x[i - 1], x[i])
+-- l6:          swapped = true
+-- l7:      i = i + 1
+-- l8: swapped != false ? jump to l1
+-- l9: end
+
+
+-- There exist no path in which the algorithm ends
+-- It should be false, as the algorithm is supposed to end
+CTLSPEC !EF(pc = l9)
+
+-- There exists no path in which the algorithm ends with a sorted array
+-- It should be false, as the algorithm should end only when the array is sorted
+CTLSPEC !EF(pc = l9 & sorted)
+CTLSPEC !EG(EF(pc = l9 & sorted))
