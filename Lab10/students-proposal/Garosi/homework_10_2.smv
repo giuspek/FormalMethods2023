@@ -1,0 +1,110 @@
+MODULE sorter(arr, len)
+    VAR
+        pc : {l0, l1, l2, l3, l4, l5};
+        pos : 0..5;
+
+    INIT
+        pc = l0;
+
+    DEFINE
+        sorted :=   arr[0] <= arr[1] &
+                    arr[1] <= arr[2] &
+                    arr[2] <= arr[3] &
+                    arr[3] <= arr[4];
+
+    TRANS
+        pc = l0 -> (
+            next(pos) = 0 &
+            next(pc) = l1
+        )
+
+    TRANS
+        pc = l1 -> (
+            ((pos < len & next(pc) = l2) |
+            (pos >= len & next(pc) = l5)
+            ) &
+            next(pos) = pos
+        )
+
+    TRANS
+        pc = l2 -> (
+            (
+                ((pos = 0 | arr[pos] >= arr[pos - 1]) & next(pc) = l3) |
+                ((pos != 0 & arr[pos] < arr[pos - 1]) & next(pc) = l4)
+            ) &
+            pos < len &
+            next(pos) = pos
+        )
+
+    TRANS
+        pc = l3 -> (
+            pos < len &
+            (pos = 0 | arr[pos] >= arr[pos - 1]) &
+            next(pos) = pos + 1 &
+            next(pc) = l1
+        )
+
+    TRANS
+        pc = l4 -> (
+            pos < len &
+            (pos != 0 & arr[pos] < arr[pos - 1]) &
+            next(pos) = pos - 1 &
+            next(pc) = l1
+        )
+
+    ASSIGN
+    -- Handling swapping in l4, otherwise keep it fixed
+    
+        next(arr[0]) := case
+            pc = l4 & pos = 1 : arr[1];
+            TRUE : arr[0];
+        esac;
+
+        next(arr[1]) := case
+            pc = l4 & pos = 1 : arr[0];
+            pc = l4 & pos = 2 : arr[2];
+            TRUE : arr[1];
+        esac;
+
+        next(arr[2]) := case
+            pc = l4 & pos = 2 : arr[1];
+            pc = l4 & pos = 3 : arr[3];
+            TRUE : arr[2];
+        esac;
+
+        next(arr[3]) := case
+            pc = l4 & pos = 3 : arr[2];
+            pc = l4 & pos = 4 : arr[4];
+            TRUE : arr[3];
+        esac;
+
+        next(arr[4]) := case
+            pc = l4 & pos = 4 : arr[3];
+            TRUE : arr[4];
+        esac;
+
+    TRANS
+        pc = l5 -> next(pc) = l5
+
+
+MODULE main
+    VAR
+        arr : array 0..4 of 0..10;
+        sorter : sorter(arr, 5);
+
+    INIT
+        arr[0] = 9 &
+        arr[1] = 7 &
+        arr[2] = 5 &
+        arr[3] = 3 &
+        arr[4] = 1
+
+
+-- The algorithm always terminates
+LTLSPEC F(G(sorter.pc = l5))
+
+-- Eventually in the future, the array will be sorted forever
+LTLSPEC F(G(sorter.sorted))
+
+-- Eventually the array is sorted and the algorithm is not done until the array is sorted
+LTLSPEC (sorter.pc != l5) U (sorter.sorted)
