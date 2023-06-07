@@ -1,0 +1,123 @@
+MODULE main
+    VAR
+    -- Missionaries and cannibals
+        mis_1 : {left, right};
+        mis_2 : {left, right};
+        mis_3 : {left, right};
+        can_1 : {left, right};
+        can_2 : {left, right};
+        can_3 : {left, right};
+    -- Passengers
+        passenger_1 : {m_1, m_2, m_3, c_1, c_2, c_3};
+        passenger_2 : {m_1, m_2, m_3, c_1, c_2, c_3, none};
+    -- Boat
+        boat : {left, right};
+
+    INIT
+        mis_1 = left &
+        mis_2 = left &
+        mis_3 = left &
+        can_1 = left &
+        can_2 = left &
+        can_3 = left &
+        boat = left;
+
+    DEFINE
+        carry_m_1 := ((passenger_1 = m_1) | (passenger_2 = m_1)) ;--& boat = mis_1;
+        carry_m_2 := ((passenger_1 = m_2) | (passenger_2 = m_2)) ;--& boat = mis_2;
+        carry_m_3 := ((passenger_1 = m_3) | (passenger_2 = m_3)) ;--& boat = mis_3;
+        carry_c_1 := ((passenger_1 = c_1) | (passenger_2 = c_1)) ;--& boat = can_1;
+        carry_c_2 := ((passenger_1 = c_2) | (passenger_2 = c_2)) ;--& boat = can_2;
+        carry_c_3 := ((passenger_1 = c_3) | (passenger_2 = c_3)) ;--& boat = can_3;
+
+        mis_left := case
+            (mis_1 = left & mis_2 != left & mis_3 != left) |
+            (mis_1 != left & mis_2 = left & mis_3 != left) |
+            (mis_1 != left & mis_2 != left & mis_3 = left) :
+                1;
+            (mis_1 = left & mis_2 = left & mis_3 != left) |
+            (mis_1 = left & mis_2 != left & mis_3 = left) |
+            (mis_1 != left & mis_2 = left & mis_3 = left) :
+                2;
+            TRUE: 3;
+        esac;
+        mis_right := 3 - mis_left;
+
+        can_left := case
+            (can_1 = left & can_2 != left & can_3 != left) |
+            (can_1 != left & can_2 = left & can_3 != left) |
+            (can_1 != left & can_2 != left & can_3 = left) :
+                1;
+            (can_1 = left & can_2 = left & can_3 != left) |
+            (can_1 = left & can_2 != left & can_3 = left) |
+            (can_1 != left & can_2 = left & can_3 = left) :
+                2;
+            TRUE: 3;
+        esac;
+        can_right := 3 - can_left;
+
+    INVAR
+        passenger_1 != passenger_2
+
+    INVAR
+        (mis_left > 0 -> can_left <= mis_left) &
+        (mis_right > 0 -> can_right <= mis_right)
+
+    ASSIGN
+        next(mis_1) := case carry_m_1 & mis_1 = left : right; carry_m_1 & mis_1 = right : left; TRUE: mis_1; esac;
+        next(mis_2) := case carry_m_2 & mis_2 = left : right; carry_m_2 & mis_2 = right : left; TRUE: mis_2; esac;
+        next(mis_3) := case carry_m_3 & mis_3 = left : right; carry_m_3 & mis_3 = right : left; TRUE: mis_3; esac;
+
+        next(can_1) := case carry_c_1 & can_1 = left : right; carry_c_1 & can_1 = right : left; TRUE: can_1; esac;
+        next(can_2) := case carry_c_2 & can_2 = left : right; carry_c_2 & can_2 = right : left; TRUE: can_2; esac;
+        next(can_3) := case carry_c_3 & can_3 = left : right; carry_c_3 & can_3 = right : left; TRUE: can_3; esac;
+
+    TRANS
+        next(boat) != next(mis_1) -> (
+            next(passenger_1) != m_1 &
+            next(passenger_2) != m_1
+        )
+
+    TRANS
+        next(boat) != next(mis_2) -> (
+            next(passenger_1) != m_2 &
+            next(passenger_2) != m_2
+        )
+
+    TRANS
+        next(boat) != next(mis_3) -> (
+            next(passenger_1) != m_3 &
+            next(passenger_2) != m_3
+        )
+
+    TRANS
+        next(boat) != next(can_1) -> (
+            next(passenger_1) != c_1 &
+            next(passenger_2) != c_1
+        )
+
+    TRANS
+        next(boat) != next(can_2) -> (
+            next(passenger_1) != c_2 &
+            next(passenger_2) != c_2
+        )
+
+    TRANS
+        next(boat) != next(can_3) -> (
+            next(passenger_1) != c_3 &
+            next(passenger_2) != c_3
+        )
+
+    TRANS
+        (carry_m_1 | carry_m_2 | carry_m_3 | carry_c_1 | carry_c_2 | carry_c_3) -> (
+            next(boat) != boat
+        )
+
+    TRANS
+        (passenger_2 != none) -> (next(passenger_2) != passenger_2)
+
+    TRANS
+        next(passenger_1) != passenger_2 &
+        next(passenger_2) != passenger_1
+    
+LTLSPEC !F(mis_1 = right & mis_2 = right & mis_3 = right & can_1 = right & can_2 = right & can_3 = right)

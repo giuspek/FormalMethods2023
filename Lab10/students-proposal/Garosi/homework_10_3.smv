@@ -1,0 +1,148 @@
+MODULE main
+    VAR
+    -- The value of a frog represents the rock it is on
+        rocks : array 1..7 of 0..6;
+    -- Move: s1 = swap 1 and 2; s2 = swap 2 and 3; ...
+        move : {s12, s13,
+                s23, s24,
+                s34, s35,
+                s45, s46,
+                s56, s57,
+                s67,
+                none
+                };
+
+    INIT
+        rocks[1] = 1 &
+        rocks[2] = 2 &
+        rocks[3] = 3 &
+        rocks[4] = 0 &
+        rocks[5] = 4 &
+        rocks[6] = 5 &
+        rocks[7] = 6 &
+        move = none
+
+    DEFINE
+        can_move_1_to_R := (rocks[2] = 0 | (rocks[2] != 0 & rocks[3] = 0));
+        
+        can_move_2_to_L := (rocks[1] = 0);
+        can_move_2_to_R := (rocks[3] = 0 | (rocks[3] != 0 & rocks[4] = 0));
+
+        can_move_3_to_L := (rocks[2] = 0 | (rocks[2] != 0 & rocks[1] = 0));
+        can_move_3_to_R := (rocks[4] = 0 | (rocks[4] != 0 & rocks[5] = 0));
+
+        can_move_4_to_L := (rocks[3] = 0 | (rocks[3] != 0 & rocks[2] = 0));
+        can_move_4_to_R := (rocks[5] = 0 | (rocks[5] != 0 & rocks[6] = 0));
+
+        can_move_5_to_L := (rocks[4] = 0 | (rocks[4] != 0 & rocks[3] = 0));
+        can_move_5_to_R := (rocks[6] = 0 | (rocks[6] != 0 & rocks[7] = 0));
+
+        can_move_6_to_L := (rocks[5] = 0 | (rocks[5] != 0 & rocks[4] = 0));
+        can_move_6_to_R := (rocks[7] = 0);
+
+        can_move_7_to_L := (rocks[6] = 0 | (rocks[6] != 0 & rocks[5] = 0));
+
+
+        green_on_the_left :=
+            (rocks[1] = 4 | rocks[1] = 5 | rocks[1] = 6) &
+            (rocks[2] = 4 | rocks[2] = 5 | rocks[2] = 6) &
+            (rocks[3] = 4 | rocks[3] = 5 | rocks[3] = 6) &
+            (rocks[1] != rocks[2] & rocks[1] != rocks[3] & rocks[2] != rocks[3]);
+        
+        brown_on_the_right :=
+            (rocks[5] = 1 | rocks[5] = 2 | rocks[5] = 3) &
+            (rocks[6] = 1 | rocks[6] = 2 | rocks[6] = 3) &
+            (rocks[7] = 1 | rocks[7] = 2 | rocks[7] = 3) &
+            (rocks[5] != rocks[6] & rocks[5] != rocks[7] & rocks[6] != rocks[7]);
+
+        solved := green_on_the_left & brown_on_the_right &  rocks[4] = 0;
+
+
+    TRANS
+        (!(next(can_move_1_to_R) & next(rocks[2]) = 0) &
+        !(next(can_move_2_to_L) & next(rocks[1]) = 0)) -> next(move) != s12
+    TRANS
+        (!(next(can_move_1_to_R) & next(rocks[2]) != 0) &
+        !(next(can_move_3_to_L) & next(rocks[2]) != 0)) -> next(move) != s13
+    TRANS
+        (!(next(can_move_2_to_R) & next(rocks[3]) = 0) &
+        !(next(can_move_3_to_L) & next(rocks[2]) = 0)) -> next(move) != s23
+    TRANS
+        (!(next(can_move_2_to_R) & next(rocks[3]) != 0) &
+        !(next(can_move_4_to_L) & next(rocks[3]) != 0)) -> next(move) != s24
+    TRANS
+        (!(next(can_move_3_to_R) & next(rocks[4]) = 0) &
+        !(next(can_move_4_to_L) & next(rocks[3]) = 0)) -> next(move) != s34
+    TRANS
+        (!(next(can_move_3_to_R) & next(rocks[4]) != 0) &
+        !(next(can_move_5_to_L) & next(rocks[4]) != 0)) -> next(move) != s35
+    TRANS
+        (!(next(can_move_4_to_R) & next(rocks[5]) = 0) &
+        !(next(can_move_5_to_L) & next(rocks[4]) = 0)) -> next(move) != s45
+    TRANS
+        (!(next(can_move_4_to_R) & next(rocks[5]) != 0) &
+        !(next(can_move_6_to_L) & next(rocks[5]) != 0)) -> next(move) != s46
+    TRANS
+        (!(next(can_move_5_to_R) & next(rocks[6]) = 0) &
+        !(next(can_move_6_to_L) & next(rocks[5]) = 0)) -> next(move) != s56
+    TRANS
+        (!(next(can_move_5_to_R) & next(rocks[6]) != 0) &
+        !(next(can_move_7_to_L) & next(rocks[6]) != 0)) -> next(move) != s57
+    TRANS
+        (!(next(can_move_6_to_R) & next(rocks[7]) = 0) &
+        !(next(can_move_7_to_L) & next(rocks[6]) = 0)) -> next(move) != s67
+
+    ASSIGN
+    -- Updating the frogs' positions
+
+        next(rocks[1]) := case
+            move = s12  : rocks[2];
+            move = s13  : rocks[3];
+            TRUE        : rocks[1];
+        esac;
+
+        next(rocks[2]) := case
+            move = s12  : rocks[1];
+            move = s23  : rocks[3];
+            move = s24  : rocks[4];
+            TRUE        : rocks[2];
+        esac;
+
+        next(rocks[3]) := case
+            move = s13  : rocks[1];
+            move = s23  : rocks[2];
+            move = s34  : rocks[4];
+            move = s35  : rocks[5];
+            TRUE        : rocks[3];
+        esac;
+
+        next(rocks[4]) := case
+            move = s24  : rocks[2];
+            move = s34  : rocks[3];
+            move = s45  : rocks[5];
+            move = s46  : rocks[6];
+            TRUE        : rocks[4];
+        esac;
+
+        next(rocks[5]) := case
+            move = s35  : rocks[3];
+            move = s45  : rocks[4];
+            move = s56  : rocks[6];
+            move = s57  : rocks[7];
+            TRUE        : rocks[5];
+        esac;
+
+        next(rocks[6]) := case
+            move = s46  : rocks[4];
+            move = s56  : rocks[5];
+            move = s67  : rocks[7];
+            TRUE        : rocks[6];
+        esac;
+
+        next(rocks[7]) := case
+            move = s57  : rocks[5];
+            move = s67  : rocks[6];
+            TRUE        : rocks[7];
+        esac;
+
+LTLSPEC !F(solved)

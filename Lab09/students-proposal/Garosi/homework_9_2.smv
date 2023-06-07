@@ -1,0 +1,98 @@
+MODULE main
+    VAR
+    -- The man and the items
+        man : {left, right};
+        fox : {left, right};
+        chicken : {left, right};
+        caterpillar : {left, right};
+        lettuce : {left, right};
+    -- The move
+        passenger_1 : {f, ch, ca, le, e};
+        passenger_2 : {f, ch, ca, le, e};
+
+    DEFINE
+        carry_fox := (passenger_1 = f) | (passenger_2 = f);
+        carry_ch := (passenger_1 = ch) | (passenger_2 = ch);
+        carry_ct := (passenger_1 = ca) | (passenger_2 = ca);
+        carry_le := (passenger_1 = le) | (passenger_2 = le);
+        no_carry := (passenger_1 = e) & (passenger_2 = e);
+
+    INIT
+        man = right &
+        fox = right &
+        chicken = right &
+        caterpillar = right &
+        lettuce = right;
+
+    TRANS
+        next(man) != next(fox) -> (
+            next(passenger_1) != f &
+            next(passenger_2) != f
+        )
+
+    TRANS
+        next(man) != next(chicken) -> (
+            next(passenger_1 != ch) &
+            next(passenger_2 != ch)
+        )
+
+    TRANS
+        next(man) != next(caterpillar) -> (
+            next(passenger_1 != ca) &
+            next(passenger_2 != ca)
+        )
+
+    TRANS
+        next(man) != next(lettuce) -> (
+            next(passenger_1 != le) &
+            next(passenger_2 != le)
+        )
+
+    -- The two passengers have to be distinct
+    INVAR
+        passenger_1 != passenger_2
+
+
+    ASSIGN
+        next(fox) := case
+            carry_fox & fox = left : right;
+            carry_fox & fox = right : left;
+            TRUE : fox;
+        esac;
+
+        next(chicken) := case
+            carry_ch & chicken = left : right;
+            carry_ch & chicken = right : left;
+            TRUE : chicken;
+        esac;
+
+        next(caterpillar) := case
+            carry_ct & caterpillar = left : right;
+            carry_ct & caterpillar = right : left;
+            TRUE : caterpillar;
+        esac;
+
+        next(lettuce) := case
+            carry_le & lettuce = left : right;
+            carry_le & lettuce = right : left;
+            TRUE : lettuce;
+        esac;
+
+    TRANS
+        (carry_fox | carry_ch | carry_ct | carry_le | no_carry) -> (
+            next(man) != man
+        )
+
+    -- The fox eats the chicken if left unattended on the same side of the river
+    INVAR
+        fox = chicken -> man = fox
+
+    -- The chicken eats the caterpillar if left unattended on the same side of the river
+    INVAR
+        chicken = caterpillar -> man = chicken
+
+    -- The caterpillar eats the lettuce if left unattended on the same side of the river
+    INVAR
+        caterpillar = lettuce -> man = caterpillar
+
+LTLSPEC !F(fox = left & chicken = left & caterpillar = left & lettuce = left)
