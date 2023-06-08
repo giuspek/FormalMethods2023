@@ -1,0 +1,133 @@
+MODULE main
+    VAR
+        IN_ : {clock, anticlock, none};
+        MD : {clock, anticlock, none};
+        OUT : {clock, anticlock, none};
+        ring_0 : {0, 90, 180, 270};
+        ring_1 : {0, 90, 180, 270};
+        ring_2 : {0, 90, 180, 270};
+        
+        move : {in_, md, out};
+
+    INIT
+        ring_0 = 0 &
+        ring_1 = 270 &
+        ring_2  = 180 &
+        IN_ = none &
+        MD = none &
+        OUT = none;
+
+    ASSIGN 
+        next(IN_) := case
+            IN_ = clock : {clock, none};
+            IN_ = anticlock : {anticlock, none};
+            IN_ = none : {clock, anticlock, none};
+        esac;
+
+        next(MD) := case
+            MD = clock : {clock, none};
+            MD = anticlock : {anticlock, none};
+            MD = none : {clock, anticlock, none};
+        esac;
+
+        next(OUT) := case
+            OUT = clock : {clock, none};
+            OUT = anticlock : {anticlock, none};
+            OUT = none : {clock, anticlock, none};
+        esac;
+
+        next(ring_0) := case
+            ring_0 = 0 & IN_ = clock : 270;
+            ring_0 = 0 & IN_ = anticlock : 90;
+            ring_0 = 90 & IN_ = clock : 0;
+            ring_0 = 90 & IN_ = anticlock : 180;
+            ring_0 = 180 & IN_ = clock : 90;
+            ring_0 = 180 & IN_ = anticlock : 270;
+            ring_0 = 270 & IN_ = clock : 180;
+            ring_0 = 270 & IN_ = anticlock : 0;
+
+            ring_0 = 0 & MD = clock : 90;
+            ring_0 = 0 & MD = anticlock : 270;
+            ring_0 = 90 & MD = clock : 180;
+            ring_0 = 90 & MD = anticlock : 0;
+            ring_0 = 180 & MD = clock : 270;
+            ring_0 = 180 & MD = anticlock : 90;
+            ring_0 = 270 & MD = clock : 0;
+            ring_0 = 270 & MD = anticlock : 180;
+
+            TRUE : ring_0;
+        esac;
+
+        next(ring_1) := case
+            ring_1 = 0 & MD = clock : 270;
+            ring_1 = 0 & MD = anticlock : 90;
+            ring_1 = 90 & MD = clock : 0;
+            ring_1 = 90 & MD = anticlock : 180;
+            ring_1 = 180 & MD = clock : 90;
+            ring_1 = 180 & MD = anticlock : 270;
+            ring_1 = 270 & MD = clock : 180;
+            ring_1 = 270 & MD = anticlock : 0;
+
+            ring_1 = 0 & IN_ = clock : 90;
+            ring_1 = 0 & IN_ = anticlock : 270;
+            ring_1 = 90 & IN_ = clock : 180;
+            ring_1 = 90 & IN_ = anticlock : 0;
+            ring_1 = 180 & IN_ = clock : 270;
+            ring_1 = 180 & IN_ = anticlock : 90;
+            ring_1 = 270 & IN_ = clock : 0;
+            ring_1 = 270 & IN_ = anticlock : 180;
+
+            ring_1 = 0 & OUT = clock : 90;
+            ring_1 = 0 & OUT = anticlock : 270;
+            ring_1 = 90 & OUT = clock : 180;
+            ring_1 = 90 & OUT = anticlock : 0;
+            ring_1 = 180 & OUT = clock : 270;
+            ring_1 = 180 & OUT = anticlock : 90;
+            ring_1 = 270 & OUT = clock : 0;
+            ring_1 = 270 & OUT = anticlock : 180;
+
+            TRUE : ring_1;
+        esac;
+
+        next(ring_2) := case
+            ring_2 = 0 & OUT = clock : 270;
+            ring_2 = 0 & OUT = anticlock : 90;
+            ring_2 = 90 & OUT = clock : 0;
+            ring_2 = 90 & OUT = anticlock : 180;
+            ring_2 = 180 & OUT = clock : 90;
+            ring_2 = 180 & OUT = anticlock : 270;
+            ring_2 = 270 & OUT = clock : 180;
+            ring_2 = 270 & OUT = anticlock : 0;
+
+            ring_2 = 0 & MD = clock : 90;
+            ring_2 = 0 & MD = anticlock : 270;
+            ring_2 = 90 & MD = clock : 180;
+            ring_2 = 90 & MD = anticlock : 0;
+            ring_2 = 180 & MD = clock : 270;
+            ring_2 = 180 & MD = anticlock : 90;
+            ring_2 = 270 & MD = clock : 0;
+            ring_2 = 270 & MD = anticlock : 180;
+
+            TRUE : ring_2;
+        esac;
+
+    TRANS
+        move = in_ -> (
+            next(MD) = none &
+            next(OUT) = none
+        )
+
+    TRANS
+        move = md -> (
+            next(IN_) = none &
+            next(OUT) = none
+        )
+
+    TRANS
+        move = out -> (
+            next(IN_) = none &
+            next(MD) = none
+        )
+        
+
+LTLSPEC !F(ring_0 = 90 & ring_1 = 90 & ring_2 = 90)
