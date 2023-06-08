@@ -24,7 +24,7 @@
 (define-fun tothours () Int (+ (* appearances timePerAppearance) (* ads timePerAd)))
 (define-fun totcost () Int (+ (* appearances appearanceCost) (* ads adCost)))
 (define-fun totratings () Int (+ (* appearances ratingsPerAppearance) (* ads ratingsPerAd)))
-(define-fun totcustomers () Int (+ (* appearances costumersPerAppearance) (* ads costumersPerAd)))
+(define-fun totcustomers () Int (+ (* appearances customersPerAppearance) (* ads customersPerAd)))
 
 (assert (>= appearances 0))
 (assert (>= ads 0))
