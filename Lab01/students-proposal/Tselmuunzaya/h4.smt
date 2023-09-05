@@ -33,20 +33,20 @@
 (assert (or x12 x22 x32 x42))
 (assert (or x13 x23 x33 x43))
 
-(assert (=> x11 (and (not x21) (not x31) (not x41) )))); check place
-(assert (=> x21 (and (not x11) (not x31) (not x41) ))))
-(assert (=> x31 (and (not x21) (not x11) (not x41) ))))
-(assert (=> x41 (and (not x21) (not x31) (not x11) ))))
+(assert (=> x11 (and (not x21) (not x31) (not x41) ))); check place
+(assert (=> x21 (and (not x11) (not x31) (not x41) )))
+(assert (=> x31 (and (not x21) (not x11) (not x41) )))
+(assert (=> x41 (and (not x21) (not x31) (not x11) )))
 
-(assert (=> x12 (and (not x22) (not x32) (not x42) ))))
-(assert (=> x22 (and (not x12) (not x32) (not x42) ))))
-(assert (=> x32 (and (not x22) (not x12) (not x42) ))))
-(assert (=> x42 (and (not x22) (not x32) (not x12) ))))
+(assert (=> x12 (and (not x22) (not x32) (not x42) )))
+(assert (=> x22 (and (not x12) (not x32) (not x42) )))
+(assert (=> x32 (and (not x22) (not x12) (not x42) )))
+(assert (=> x42 (and (not x22) (not x32) (not x12) )))
 
-(assert (=> x13 (and (not x23) (not x33) (not x43) ))))
-(assert (=> x23 (and (not x13) (not x33) (not x43) ))))
-(assert (=> x33 (and (not x23) (not x13) (not x43) ))))
-(assert (=> x43 (and (not x23) (not x33) (not x13) ))))
+(assert (=> x13 (and (not x23) (not x33) (not x43) )))
+(assert (=> x23 (and (not x13) (not x33) (not x43) )))
+(assert (=> x33 (and (not x23) (not x13) (not x43) )))
+(assert (=> x43 (and (not x23) (not x33) (not x13) )))
 
 ; chech uniqueness
 ;(assert (not x23))

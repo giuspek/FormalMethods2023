@@ -4,7 +4,7 @@
 
 ; A: B is guilty and C is innocent
 (assert B)
-(assert (not C)))
+(assert (not C))
 
 ; B: if A is guilty, then C is also guilty
 (assert (=> A C))
