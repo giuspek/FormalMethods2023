@@ -5,7 +5,7 @@
 ; ENCODING
 
 ; GX -> student X is guilty
-; IX -> studemt X is innocent
+; IX -> student X is innocent
 (declare-const GA Bool)
 (declare-const GB Bool)
 (declare-const GC Bool)
