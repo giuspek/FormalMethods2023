@@ -1,0 +1,111 @@
+MODULE main
+VAR
+    -- the man and the three items
+    fox         : {right,left};
+    chicken     : {right,left};
+    caterpillar : {right,left};
+    lettuce     : {right,left};
+    man         : {right,left};
+    -- possible moves
+    move    : {f, c, t, l, e};
+
+DEFINE
+    carry_fox := move=f;
+    carry_chicken := move=c;
+    carry_caterpillar := move=t;
+    carry_lettuce := move=l;
+    no_carry := move=e;
+
+ASSIGN
+    init(fox)         := right;
+    init(chicken)     := right;
+    init(caterpillar) := right;
+    init(lettuce)     := right;
+    init(man)         := right;
+
+    init(move) := {f, c, t, l, e};
+
+
+TRANS
+    next(man) != next(fox) -> next(move) != f
+TRANS
+    next(man) != next(chicken) -> next(move) != c
+TRANS
+    next(man) != next(caterpillar) -> next(move) != t
+TRANS
+    next(man) != next(lettuce) -> next(move) != l
+
+TRANS
+    carry_fox -> (
+        next(man) != man &
+        next(fox) != fox &
+        next(chicken) = chicken &
+        next(caterpillar) = caterpillar &
+        next(lettuce) = lettuce
+    )
+TRANS
+    carry_chicken -> (
+        next(man) != man &
+        next(chicken) != chicken &
+        next(fox) = fox &
+        next(caterpillar) = caterpillar &
+        next(lettuce) = lettuce
+    )
+TRANS
+    carry_caterpillar -> (
+        next(man) != man &
+        next(caterpillar) != caterpillar &
+        next(fox) = fox &
+        next(chicken) = chicken &
+        next(lettuce) = lettuce
+    )
+TRANS
+    carry_lettuce -> (
+        next(man) != man &
+        next(lettuce) != lettuce &
+        next(fox) = fox &
+        next(chicken) = chicken &
+        next(caterpillar) = caterpillar
+    )
+TRANS
+    no_carry -> (
+        next(man) != man &
+        next(lettuce) = lettuce &
+        next(fox) = fox &
+        next(chicken) = chicken &
+        next(caterpillar) = caterpillar
+    )
+
+INVAR
+    (fox = chicken | chicken = caterpillar) -> chicken = man
+INVAR
+    (chicken = caterpillar | caterpillar = lettuce) -> caterpillar = man
+
+DEFINE
+    goal := fox = left &
+        chicken = left &
+        caterpillar = left &
+        lettuce = left;
+
+CTLSPEC !EF goal
+CTLSPEC EF goal
+
+-- how come they both are true?
+-- nuXmv > check_ltlspec
+-- specification !( F goal)  is true
+-- specification  F goal  is true
+-- i am so confused
+
+-- nuXmv > check_ctlspec
+--********   WARNING   ********
+--Fair states set of the finite state machine is empty.
+--This might make results of model checking not trustable.
+--******** END WARNING ********
+-- specification !(EF goal)  is true
+--********   WARNING   ********
+--Fair states set of the finite state machine is empty.
+--This might make results of model checking not trustable.
+--******** END WARNING ********
+-- specification EF goal  is true
+
+-- more confusion
