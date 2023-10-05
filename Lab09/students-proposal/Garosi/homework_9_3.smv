@@ -1,0 +1,114 @@
+MODULE updater(watch, c1, c2, c3, c4, c5, c6, c7, c8, move)
+    INIT
+        watch = 0;
+
+    TRANS
+        next(move) = TRUE -> (
+            next(watch) != watch &
+
+            next(watch) != c1 &
+            next(watch) != c2 &
+            next(watch) != c3 &
+            next(watch) != c4 &
+            next(watch) != c5 &
+            next(watch) != c6 &
+            next(watch) != c7 &
+            next(watch) != c8
+        )
+
+    TRANS
+        next(move) = FALSE -> (
+            next(watch) = watch
+        )
+
+    DEFINE
+        should_change := (watch = c1 | watch = c2 | watch = c3 | watch = c4 | watch = c5 | watch = c6 | watch = c7 | watch = c8);
+
+MODULE group(c1, c2, c3, c4, c5, c6, c7, c8, c9)
+    VAR
+        move : 0..9;
+        u1 : updater(c1, c2, c3, c4, c5, c6, c7, c8, c9, move_1);
+        u2 : updater(c2, c1, c3, c4, c5, c6, c7, c8, c9, move_2);
+        u3 : updater(c3, c1, c2, c4, c5, c6, c7, c8, c9, move_3);
+        u4 : updater(c4, c1, c2, c3, c5, c6, c7, c8, c9, move_4);
+        u5 : updater(c5, c1, c2, c3, c4, c6, c7, c8, c9, move_5);
+        u6 : updater(c6, c1, c2, c3, c4, c5, c7, c8, c9, move_6);
+        u7 : updater(c7, c1, c2, c3, c4, c5, c6, c8, c9, move_7);
+        u8 : updater(c8, c1, c2, c3, c4, c5, c6, c7, c9, move_8);
+        u9 : updater(c9, c1, c2, c3, c4, c5, c6, c7, c8, move_9);
+    
+    DEFINE
+        move_1 := move = 1;
+        move_2 := move = 2;
+        move_3 := move = 3;
+        move_4 := move = 4;
+        move_5 := move = 5;
+        move_6 := move = 6;
+        move_7 := move = 7;
+        move_8 := move = 8;
+        move_9 := move = 9;
+
+    INIT
+        move = 0;
+
+    ASSIGN
+        next(move) := case
+            u1.should_change : 1;
+            u2.should_change : 2;
+            u3.should_change : 3;
+            u4.should_change : 4;
+            u5.should_change : 5;
+            u6.should_change : 6;
+            u7.should_change : 7;
+            u8.should_change : 8;
+            u9.should_change : 9;
+            TRUE             : 0;
+        esac;
+    
+
+MODULE main
+    VAR
+       -- indexes: row, col
+        c : array 1..9 of array 1..9 of 0..9;
+        
+        row_1 : group(c[1][1], c[1][2], c[1][3], c[1][4], c[1][5], c[1][6], c[1][7], c[1][8], c[1][9]);
+        row_2 : group(c[2][1], c[2][2], c[2][3], c[2][4], c[2][5], c[2][6], c[2][7], c[2][8], c[2][9]);
+        row_3 : group(c[3][1], c[3][2], c[3][3], c[3][4], c[3][5], c[3][6], c[3][7], c[3][8], c[3][9]);
+        row_4 : group(c[4][1], c[4][2], c[4][3], c[4][4], c[4][5], c[4][6], c[4][7], c[4][8], c[4][9]);
+        row_5 : group(c[5][1], c[5][2], c[5][3], c[5][4], c[5][5], c[5][6], c[5][7], c[5][8], c[5][9]);
+        row_6 : group(c[6][1], c[6][2], c[6][3], c[6][4], c[6][5], c[6][6], c[6][7], c[6][8], c[6][9]);
+        row_7 : group(c[7][1], c[7][2], c[7][3], c[7][4], c[7][5], c[7][6], c[7][7], c[7][8], c[7][9]);
+        row_8 : group(c[8][1], c[8][2], c[8][3], c[8][4], c[8][5], c[8][6], c[8][7], c[8][8], c[8][9]);
+        row_9 : group(c[9][1], c[9][2], c[9][3], c[9][4], c[9][5], c[9][6], c[9][7], c[9][8], c[9][9]);
+
+        col_1 : group(c[1][1], c[2][1], c[3][1], c[4][1], c[5][1], c[6][1], c[7][1], c[8][1], c[9][1]);
+        col_2 : group(c[1][2], c[2][2], c[3][2], c[4][2], c[5][2], c[6][2], c[7][2], c[8][2], c[9][2]);
+        col_3 : group(c[1][3], c[2][3], c[3][3], c[4][3], c[5][3], c[6][3], c[7][3], c[8][3], c[9][3]);
+        col_4 : group(c[1][4], c[2][4], c[3][4], c[4][4], c[5][4], c[6][4], c[7][4], c[8][4], c[9][4]);
+        col_5 : group(c[1][5], c[2][5], c[3][5], c[4][5], c[5][5], c[6][5], c[7][5], c[8][5], c[9][5]);
+        col_6 : group(c[1][6], c[2][6], c[3][6], c[4][6], c[5][6], c[6][6], c[7][6], c[8][6], c[9][6]);
+        col_7 : group(c[1][7], c[2][7], c[3][7], c[4][7], c[5][7], c[6][7], c[7][7], c[8][7], c[9][7]);
+        col_8 : group(c[1][8], c[2][8], c[3][8], c[4][8], c[5][8], c[6][8], c[7][8], c[8][8], c[9][8]);
+        col_9 : group(c[1][9], c[2][9], c[3][9], c[4][9], c[5][9], c[6][9], c[7][9], c[8][9], c[9][9]);
+
+        sqr_1 : group(c[1][1], c[1][2], c[1][3], c[2][1], c[2][2], c[2][3], c[3][1], c[3][2], c[3][3]); -- top left
+        sqr_2 : group(c[1][4], c[1][5], c[1][6], c[2][4], c[2][5], c[2][6], c[3][4], c[3][5], c[3][6]); -- top center
+        sqr_3 : group(c[1][7], c[1][8], c[1][9], c[2][7], c[2][8], c[2][9], c[3][7], c[3][8], c[3][9]); -- top right
+        sqr_4 : group(c[4][1], c[4][2], c[4][3], c[5][1], c[5][2], c[5][3], c[6][1], c[6][2], c[6][3]); -- center left
+        sqr_5 : group(c[4][4], c[4][5], c[4][6], c[5][4], c[5][5], c[5][6], c[6][4], c[6][5], c[6][6]); -- center center
+        sqr_6 : group(c[4][7], c[4][8], c[4][9], c[5][7], c[5][8], c[5][9], c[6][7], c[6][8], c[6][9]); -- center right
+        sqr_7 : group(c[7][1], c[7][2], c[7][3], c[8][1], c[8][2], c[8][3], c[9][1], c[9][2], c[9][3]); -- bottom left
+        sqr_8 : group(c[7][4], c[7][5], c[7][6], c[8][4], c[8][5], c[8][6], c[9][4], c[9][5], c[9][6]); -- bottom center
+        sqr_9 : group(c[7][7], c[7][8], c[7][9], c[8][7], c[8][8], c[8][9], c[9][7], c[9][8], c[9][9]); -- bottom right
+
+-- Forcing a configuration
+LTLSPEC !F(
+    c[1][1] = 9 & c[1][3] = 8 & c[1][4] = 1 &
+    c[1][5] = 3 & c[1][8] = 6 & c[2][4] = 2 &
+    c[3][1] = 6 & c[3][9] = 7 & c[4][2] = 4 &
+    c[4][7] = 5 & c[5][3] = 1 & c[5][4] = 6 &
+    c[5][5] = 8 & c[5][8] = 7 & c[6][6] = 9 &
+    c[7][2] = 1 & c[7][4] = 3 & c[7][5] = 9 &
+    c[7][9] = 4 & c[8][6] = 2 & c[8][8] = 3 &
+    c[9][3] = 9 & c[9][6] = 7
+)
